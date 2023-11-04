@@ -1,0 +1,68 @@
+---
+title: "Report for column `r params$var` of dataset `r params$dataset`"
+output: html_document
+date: "2023-01-27"
+params:
+  dataset: mtcars
+  var: "am"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Frequency table for `r params$var`
+
+```{r, echo = F}
+create_table <- function(dataset, var){
+
+  dataset <- get(dataset)
+
+  table(dataset[var]) |>
+    knitr::kable()
+}
+```
+
+
+The table below is for variable `r params$var` of 
+dataset `r params$dataset`.
+
+```{r}
+create_table(params$dataset, params$var)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+# Run these lines to compile the document
+# Set eval and echo to FALSE, so that this does not appear
+# in the output, and does not get evaluated when knitting
+rmarkdown::render(
+             input = "tempelating parameterized reports.Rmd",
+             params = list(
+               dataset = "mtcars",
+               var = "cyl"
+             )
+           )
+
+```
+
+I use lapply() to loop over a list of column names (that I get using colnames()). Because I don’t want to overwrite the report I need to change the name of the output file. I do so by using paste0() which creates a new string that contains the variable name, so each report gets its own name. x inside the paste0() function is each element, one after the other, of the columns variable I defined first.
+
+```{r, eval = F, echo = F}
+columns <- colnames(mtcars)
+
+lapply(columns,
+  (\(x)rmarkdown::render(
+                    input = "param_report_example.Rmd",
+                    output_file = paste0(
+                      "param_report_example_", x, ".html"
+                    ),
+                    params = list(
+                      dataset = "mtcars",
+                      var = x
+                    )
+                  )
+  )
+)
+```
+
